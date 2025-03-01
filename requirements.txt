@@ -1,3 +1,5 @@
-jupyterlab==4.3.5
-python-dotenv==1.0.1
 jigsawstack==0.1.28
+jupyterlab==4.3.5
+openpyxl==3.1.5
+pandas==2.2.3
+python-dotenv==1.0.1
