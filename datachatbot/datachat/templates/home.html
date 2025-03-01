@@ -8,5 +8,23 @@
 <body>
     <h1>Welcome to My Django Page!</h1>
     <p>This is my custom homepage instead of the default Django welcome screen.</p>
+    <table class="table">
+        <thead>
+            <tr>
+                {% for col_header in col_headers %}
+                    <th scope="col">{{col_header}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in row_data %}
+                <tr>
+                    {% for indiv in data %}
+                    <td>{{indiv}}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
