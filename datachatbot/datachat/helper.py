@@ -7,7 +7,7 @@ from datachat.models import (
     InvoiceItem,
 )
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.db.models import Sum
 from django.db import connection
 
@@ -32,10 +32,10 @@ def prompt_1_expected_result() -> list[CalculationResult]:
     p2 = Product.objects.get(product_code="R0001")
     all_outlets = Outlet.objects.all()
     for outlet in all_outlets:
-        all_outlete_invoices = Invoice.objects.filter(origin_address=outlet.address).all()
+        all_outlet_invoices = Invoice.objects.filter(origin_address=outlet.address).all()
         p1_total = Decimal("0.00")
         p2_total = Decimal("0.00")
-        for invoice in all_outlete_invoices:
+        for invoice in all_outlet_invoices:
             p1_for_invoice = InvoiceItem.objects.filter(
                 invoice=invoice,
                 product=p1
@@ -74,3 +74,29 @@ def prompt_1_inject_raw_sql():
 
 def display_table(data_result: list[tuple]) -> TableResult:
     pass
+
+def prompt_2_django_orm() -> Decimal:
+    total_sales = Invoice.objects.all().aggregate(Sum('total'))["total__sum"]
+    warehouse_sales = Invoice.objects.filter(origin_address_type="2").aggregate(Sum('total'))["total__sum"]
+    result = Decimal(warehouse_sales / total_sales)
+    percentage = (result * 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    return percentage
+
+def prompt_2_inject_raw_sql():
+    warehouse_sale_sql = """
+        SELECT SUM(total)
+        FROM datachat_invoice
+        WHERE origin_address_type = 2;
+    """
+    total_sale_sql = """
+        SELECT SUM(total)
+        FROM datachat_invoice
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(warehouse_sale_sql)
+        res_1 = cursor.fetchall()
+        warehouse_sales = res_1[0][0]
+        cursor.execute(total_sale_sql)
+        res_2 = cursor.fetchall()
+        total_sales = res_2[0][0]
+        return (Decimal(warehouse_sales / total_sales) * 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
