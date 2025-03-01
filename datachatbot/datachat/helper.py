@@ -1,15 +1,16 @@
 from datachat.models import (
     Product,
     Outlet,
-    Warehouse,
-    Address,
     Invoice,
     InvoiceItem,
+    Warehouse
 )
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from django.db.models import Sum
 from django.db import connection
+from matplotlib import pyplot
+import mpld3
 
 @dataclass
 class ProductResult:
@@ -24,7 +25,12 @@ class CalculationResult:
 @dataclass
 class TableResult:
     col_headers: list[str]
-    row_data: list[tuple]    
+    row_data: list[tuple]
+
+@dataclass
+class BarChartResult:
+    name: str
+    amount: Decimal
 
 def prompt_1_expected_result() -> list[CalculationResult]:
     results = []
@@ -100,3 +106,27 @@ def prompt_2_inject_raw_sql():
         res_2 = cursor.fetchall()
         total_sales = res_2[0][0]
         return (Decimal(warehouse_sales / total_sales) * 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+def prompt_3_django_orm():
+    all_outlets = Outlet.objects.all()
+    all_warehouses = Warehouse.objects.all()
+    results = []
+    for outlet in all_outlets:
+        outlet_sum = Invoice.objects.filter(origin_address=outlet.address).aggregate(Sum('total'))["total__sum"]
+        results.append(BarChartResult(outlet.name, outlet_sum))
+    for warehouse in all_warehouses:
+        warehouse_sum = Invoice.objects.filter(origin_address=warehouse.address).aggregate(Sum('total'))["total__sum"]
+        results.append(BarChartResult(warehouse.name, warehouse_sum))
+    x_axis = [result.name for result in results]
+    y_axis = [result.amount for result in results]
+    pyplot.figure()
+    pyplot.bar(x_axis, y_axis)
+    pyplot.title("Sales By Outlet")
+    pyplot.xlabel("Locations")
+    pyplot.ylabel("Sales")
+    chart_html = mpld3.fig_to_html(pyplot.gcf())
+    pyplot.clf()
+    return chart_html
+
+def prompt_3_sql():
+    pass

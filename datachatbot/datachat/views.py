@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import HttpRequest
 from datachat.helper import (
     prompt_1_inject_raw_sql,
-    prompt_2_django_orm,
-    prompt_2_inject_raw_sql
+    prompt_2_inject_raw_sql,
+    prompt_3_django_orm
 )
 
 # Create your views here.
@@ -23,5 +23,7 @@ def prompt_2(request: HttpRequest):
     })
 
 def prompt_3(request: HttpRequest):
+    result = prompt_3_django_orm()
     return render(request, "p3.html", {
+        "chart": result
     })
