@@ -1,0 +1,89 @@
+Expected Functions 
+
+Prompt 1 
+
+from django.db.models import Sum
+from dataclasses import dataclasses
+	
+@dataclasses
+class CalculationResult:
+	outlet: list[Outlet]
+	product_results: list[ProductResult]
+
+results = []
+p1 = Product.objects.get(product_code="D0001")
+p2 = Product.objects.get(product_code="R0001")
+all_outlets = Outlet.objects.all()
+for outlet in all_outlets:
+	outlet_invoice = Invoice.objects.get(outlet=outlet)
+	p1_total = InvoiceItem.objects.filter(product_id=p1, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
+	p2_total = InvoiceItem.objects.filter(product_id=p2, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
+	p3_total = InvoiceItem.objects.filter(product_id=p3, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
+	results.append(CalculationResult(outlet, p1_total, p2_total, p3_total)
+	
+<table class="table">
+	<thead>
+		<tr>
+			<th scope"col"></th>
+			<th scope="col">"Outlet 1"</th>
+			<th scope="col">"Outlet 2"</th>
+			<th scope="col">"Outlet 3"</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>"D0001"</td>
+			<td>"400.00"</td>
+			<td>"400.00"</td>
+			<td>"1200.00"</td>
+		</tr>
+		<tr>
+			<td>"R0001"</td>
+			<td>"200.00"</td>
+			<td>"1000.00"</td>
+			<td>"600.00"</td>
+		</tr>
+		<tr>
+			<td>"T0001"</td>
+			<td>"0.00"</td>
+			<td>"350.00"</td>
+			<td>"0.00"</td>
+		</tr>		
+	</tbody>
+</table>
+	
+	
+Prompt 2
+all_warehouse = Warehouse.objects.all()
+total_sales = Invoice.objects.all().aggregate(Sum('total'))
+warehouse_sales = Invoice.objects.filter(origin_address_type="2").aggregate(Sum('total'))
+result = Decimal(warehouse_sales / total_sales)
+
+<div>Result: {{result}}% </div>
+
+Prompt 3
+import matplotlib.pyplot
+import numpy
+
+@dataclasses
+class Result:
+	name: str
+	amount: Decimal
+
+all_outlets = Outlet.objects.all()
+all_warehouses = Warehouse.objects.all()
+results = []
+for outlet in all_outlets:
+	outlet_sum = Invoice.objects.filter(origin_address=outlet.address).aggregate(Sum('total'))
+	results.append(Result(outlet.name, outlet_sum)
+for warehouse in all_warehouses:
+	warehouse_sum = Invoice.objects.filter(origin_address=warehouse.address).aggregate(Sum('total'))
+	results.append(Result(warehouse.name, warehouse_sum)
+
+x-axis = [result.name for result in results]
+y-axis = [result.amount for result in results]
+pyplot.bar(x-axis, y-axis)
+pyplot.title("Sales By Outlet")
+pyplot.xlabel("Locations")
+pyplot.ylabel("Sales")
+pyplot.show()
