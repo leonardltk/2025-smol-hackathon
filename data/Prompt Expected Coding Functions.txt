@@ -15,11 +15,11 @@ p1 = Product.objects.get(product_code="D0001")
 p2 = Product.objects.get(product_code="R0001")
 all_outlets = Outlet.objects.all()
 for outlet in all_outlets:
-	outlet_invoice = Invoice.objects.get(outlet=outlet)
+	outlet_invoice = Invoice.objects.get(origin_address_id=outlet.address_id)
 	p1_total = InvoiceItem.objects.filter(product_id=p1, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
 	p2_total = InvoiceItem.objects.filter(product_id=p2, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
 	p3_total = InvoiceItem.objects.filter(product_id=p3, invoice_id=outlet_invoice).aggregate(Sum('line_total'))
-	results.append(CalculationResult(outlet, p1_total, p2_total, p3_total)
+	results.append(CalculationResult(outlet, p1_total, p2_total, p3_total))
 	
 <table class="table">
 	<thead>
