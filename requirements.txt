@@ -1,0 +1,3 @@
+jupyterlab==4.3.5
+python-dotenv==1.0.1
+jigsawstack==0.1.28
